@@ -2,8 +2,9 @@ package renders
 
 import (
 	"bytes"
-	config2 "github.com/prashanth-gajula/bookings/pkg/config"
-	models2 "github.com/prashanth-gajula/bookings/pkg/models"
+	"github.com/justinas/nosurf"
+	config2 "github.com/prashanth-gajula/bookings/internal/config"
+	models2 "github.com/prashanth-gajula/bookings/internal/models"
 	//config2 "github/prashanth-gajula/go-course/pkg/config"
 	//"github/prashanth-gajula/go-course/pkg/models"
 	"log"
@@ -17,10 +18,11 @@ var app *config2.AppConfig
 func NewTemplates(a *config2.AppConfig) {
 	app = a
 }
-func AddDefaultData(td *models2.TemplateData) *models2.TemplateData {
+func AddDefaultData(td *models2.TemplateData, r *http.Request) *models2.TemplateData {
+	td.CSRFToken = nosurf.Token(r)
 	return td
 }
-func RenderTemplate(w http.ResponseWriter, html string, td *models2.TemplateData) {
+func RenderTemplate(w http.ResponseWriter, r *http.Request, html string, td *models2.TemplateData) {
 	//the function will take the response variable and the name of the template
 	//parse it and write the information to the browser window
 	// create a template cache
@@ -39,7 +41,7 @@ func RenderTemplate(w http.ResponseWriter, html string, td *models2.TemplateData
 		log.Fatal("couldn't get the template from template cache not working")
 	}
 	buf := new(bytes.Buffer)
-	td = AddDefaultData(td)
+	td = AddDefaultData(td, r)
 	err := t.Execute(buf, td)
 	if err != nil {
 		log.Println("Error while executing:", err)
