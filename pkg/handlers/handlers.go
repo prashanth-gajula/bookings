@@ -56,6 +56,16 @@ func (m *Repository) Generals(w http.ResponseWriter, r *http.Request) {
 
 //majors renders to rooms
 
-func (m *Repository) majors(w http.ResponseWriter, r *http.Request) {
+func (m *Repository) Majors(w http.ResponseWriter, r *http.Request) {
 	renders2.RenderTemplate(w, "majors.page.html", &models2.TemplateData{})
+}
+
+// renders the search availability page
+func (m *Repository) Availability(w http.ResponseWriter, r *http.Request) {
+	renders2.RenderTemplate(w, "search-availability.html", &models2.TemplateData{})
+}
+
+// renders the contact page page
+func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
+	renders2.RenderTemplate(w, "contact.page.html", &models2.TemplateData{})
 }
