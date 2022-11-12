@@ -32,7 +32,7 @@ func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
 	remoteIp := r.RemoteAddr
 	m.App.Session.Put(r.Context(), "remote_ip", remoteIp)
 
-	renders2.RenderTemplate(w, "home.html", &models2.TemplateData{})
+	renders2.RenderTemplate(w, "home.page.html", &models2.TemplateData{})
 }
 
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
@@ -40,8 +40,22 @@ func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 	stringMap["test"] = "Hello Again!"
 	remoteIp := m.App.Session.GetString(r.Context(), "remote_ip")
 	stringMap["remote_ip"] = remoteIp
-	renders2.RenderTemplate(w, "about.html", &models2.TemplateData{
+	renders2.RenderTemplate(w, "about.page.html", &models2.TemplateData{
 		StringMap: stringMap,
 	})
+}
 
+func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
+	renders2.RenderTemplate(w, "make-reservation.page.html", &models2.TemplateData{})
+}
+
+// generals renders to rooms
+func (m *Repository) Generals(w http.ResponseWriter, r *http.Request) {
+	renders2.RenderTemplate(w, "generals.page.html", &models2.TemplateData{})
+}
+
+//majors renders to rooms
+
+func (m *Repository) majors(w http.ResponseWriter, r *http.Request) {
+	renders2.RenderTemplate(w, "majors.page.html", &models2.TemplateData{})
 }
