@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	config2 "github.com/prashanth-gajula/bookings/internal/config"
+	"github.com/prashanth-gajula/bookings/internal/forms"
 	models2 "github.com/prashanth-gajula/bookings/internal/models"
+	//"github.com/prashanth-gajula/bookings/internal/models"
 	renders2 "github.com/prashanth-gajula/bookings/internal/renders"
 	"log"
 
@@ -50,7 +52,46 @@ func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
-	renders2.RenderTemplate(w, r, "make-reservation.page.html", &models2.TemplateData{})
+	var emptyreservation models2.Reservation
+	data := make(map[string]interface{})
+	data["reservation"] = emptyreservation
+	renders2.RenderTemplate(w, r, "make-reservation.page.html", &models2.TemplateData{
+		Form: forms.New(nil),
+		Data: data,
+	})
+
+}
+
+func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	reservation := models2.Reservation{
+		FirstName: r.Form.Get("first_name"),
+		LastName:  r.Form.Get("last_name"),
+		Phone:     r.Form.Get("phone"),
+		Email:     r.Form.Get("email"),
+	}
+	form := forms.New(r.PostForm)
+	//form.Has("first_name", r)
+	form.Required("first_name", "last_name", "email")
+	form.MinLength("first_name", 3, r)
+	form.IsEmail("email")
+	if !form.Valid() {
+		data := make(map[string]interface{})
+		data["reservation"] = reservation
+
+		renders2.RenderTemplate(w, r, "make-reservation.page.html", &models2.TemplateData{
+			Form: form,
+			Data: data,
+		})
+		return
+	}
+	m.App.Session.Put(r.Context(), "reservation", "reservation")
+	http.Redirect(w, r, "/Reservation-Summary", http.StatusSeeOther)
+
 }
 
 // generals renders to rooms
@@ -102,4 +143,18 @@ func (m *Repository) Availabilityjson(w http.ResponseWriter, r *http.Request) {
 // renders the contact page page
 func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
 	renders2.RenderTemplate(w, r, "contact.html", &models2.TemplateData{})
+}
+
+func (m *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) {
+	reservation, ok := m.App.Session.Get(r.Context(), "reservation").(models2.Reservation)
+	if !ok {
+		fmt.Println("cannot get data out of session")
+		return
+	}
+	data := make(map[string]interface{})
+	data["reservation"] = reservation
+
+	renders2.RenderTemplate(w, r, "reservation-summary.page.html", &models2.TemplateData{
+		Data: data,
+	})
 }
