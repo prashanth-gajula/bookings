@@ -24,6 +24,25 @@ var session *scs.SessionManager
 
 func main() {
 
+	err := run()
+	if err != nil {
+		log.Fatal("Error occured:", err)
+	}
+
+	fmt.Println(fmt.Sprintf("Starting Page At PortNumber %s", PortNumber))
+
+	//_ = http.ListenAndServe(PortNumber, nil)
+	serv := &http.Server{
+		Addr:    PortNumber,
+		Handler: routes(&app),
+	}
+	err = serv.ListenAndServe()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func run() error {
 	//code to tell the go that we are storing the values in the session
 	gob.Register(models2.Reservation{})
 
@@ -42,6 +61,7 @@ func main() {
 	//log.Println(tc)
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 	app.TemplateCache = tc
 	app.UseCache = false
@@ -50,16 +70,5 @@ func main() {
 	renders2.NewTemplates(&app)
 	//http.HandleFunc("/", handlers2.Repo.Home)
 	//http.HandleFunc("/about", handlers2.Repo.About)
-
-	fmt.Println(fmt.Sprintf("Starting Page At PortNumber %s", PortNumber))
-
-	//_ = http.ListenAndServe(PortNumber, nil)
-	serv := &http.Server{
-		Addr:    PortNumber,
-		Handler: routes(&app),
-	}
-	err = serv.ListenAndServe()
-	if err != nil {
-		log.Fatal(err)
-	}
+	return nil
 }
